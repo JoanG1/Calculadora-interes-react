@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { Formik, Form } from "formik";
+import * as yup from 'yup'
 import Input from './components/Input';
 import Button from './components/Button'
 import Container from './components/Container'
 import Section from './components/Section'
+import Balance from './components/Balance'
 
 const compoundInterest = ( deposit, contribution, years, rate) =>{
 
@@ -19,6 +21,13 @@ const compoundInterest = ( deposit, contribution, years, rate) =>{
 
 }
 
+const formatter = new Intl.NumberFormat('en-US', {
+  style: 'currency',
+  currency: 'USD',
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
+})
+
 function App() {
 
   const [balance, setBalance] = useState("")
@@ -26,7 +35,7 @@ function App() {
   const handleSubmit = ({deposit, contribution, years, rate}) => {
 
     const val = compoundInterest(Number(deposit), Number(contribution),Number(years), Number(rate))
-    setBalance(val)
+    setBalance(formatter.format(val))
 
   }
 
@@ -34,20 +43,31 @@ function App() {
 
     <Container>
       <Section>
-        <Formik initialValues={{deposit: "", contribution: "", years: "", rate: "",  }} onSubmit ={handleSubmit}>
+        <Formik initialValues={{
+          
+          deposit: "", contribution: "", years: "", rate: "",  }} 
+        
+          onSubmit ={handleSubmit} 
+          validationSchema={yup.object({
+
+            deposit: yup.number().required('obligatorio').typeError('Debe de ser un numero '),
+            contribution: yup.number().required('obligatorio').typeError('Debe de ser un numero '),
+            years: yup.number().required('obligatorio').typeError('Debe de ser un numero '),
+            rate: yup.number().required('obligatorio').typeError('Debe de ser un numero '),
+        })}>
 
           <Form>
             <Input name="deposit" label ="Deposito Inicial"/>
             <Input name="contribution" label ="Contribucion Anual"/>
             <Input name="years" label ="Años"/>
             <Input name="rate" label ="Interes Estimado"/>
-            <Button>Calcular</Button>
+            <Button type="submit">Calcular</Button>
   
           </Form>
 
         </Formik>
 
-        {balance !== "" ? `Balance Final: ${balance}`: null}
+        {balance !== "" ? <Balance>Balance Final: {balance}</Balance>: null}
       </Section>
     </Container>
     
